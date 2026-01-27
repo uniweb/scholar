@@ -1,0 +1,49 @@
+{
+  "name": "@uniweb/scholar",
+  "version": "0.1.0",
+  "description": "Academic content utilities for Uniweb - math rendering, bibliographic references, and inline citations",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./math": "./src/math/index.js",
+    "./bibliography": "./src/bibliography/index.js",
+    "./citations": "./src/citations/index.js",
+    "./components": "./src/components/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "sideEffects": false,
+  "keywords": [
+    "uniweb",
+    "scholar",
+    "academic",
+    "math",
+    "katex",
+    "latex",
+    "bibliography",
+    "citations",
+    "bibtex",
+    "apa",
+    "mla"
+  ],
+  "author": "Proximify",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uniweb/scholar.git"
+  },
+  "homepage": "https://github.com/uniweb/scholar#readme",
+  "bugs": {
+    "url": "https://github.com/uniweb/scholar/issues"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "dependencies": {
+    "katex": "^0.16.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  }
+}
