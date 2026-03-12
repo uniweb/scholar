@@ -2,15 +2,66 @@
  * AuthorList Component
  *
  * Renders a formatted list of authors with optional ORCID links.
+ * Works with both Scholar-shaped author objects and CSL-JSON name objects.
  *
  * @module @uniweb/scholar/components/AuthorList
  */
 
 import React from 'react'
-import { formatAuthors } from '../bibliography/utils/authors.js'
 
 /**
- * AuthorList - Formatted author names
+ * Format a single author name for display.
+ *
+ * @param {{ family: string, given?: string, suffix?: string }} author
+ * @param {boolean} invertFirst - Show as "Last, First" (true) or "First Last" (false)
+ * @returns {string}
+ */
+function formatName(author, invertFirst = false) {
+  if (typeof author === 'string') return author
+
+  const family = author.family || ''
+  const given = author.given || ''
+  const suffix = author.suffix ? `, ${author.suffix}` : ''
+
+  if (!given) return family + suffix
+
+  return invertFirst
+    ? `${family}${suffix}, ${given}`
+    : `${given} ${family}${suffix}`
+}
+
+/**
+ * Format an array of authors into a display string.
+ *
+ * @param {Array} authors - Author objects
+ * @param {Object} options
+ * @param {string} [options.style='apa']
+ * @returns {string}
+ */
+function formatAuthorsText(authors, { style = 'apa' } = {}) {
+  if (!authors?.length) return ''
+
+  const useAmpersand = style === 'apa'
+  const invertFirst = style === 'apa' || style === 'chicago' || style === 'mla'
+
+  if (authors.length === 1) {
+    return formatName(authors[0], invertFirst)
+  }
+
+  if (authors.length === 2) {
+    const sep = useAmpersand ? ' & ' : ' and '
+    return formatName(authors[0], invertFirst) + sep + formatName(authors[1])
+  }
+
+  // 3+ authors
+  const allButLast = authors.slice(0, -1).map((a, i) => formatName(a, i === 0 && invertFirst))
+  const last = formatName(authors[authors.length - 1])
+  const sep = useAmpersand ? ', & ' : ', and '
+  return allButLast.join(', ') + sep + last
+}
+
+/**
+ * AuthorList - Formatted author names with optional ORCID links
  *
  * @param {Object} props
  * @param {Array|string} props.authors - Authors array or string
@@ -21,9 +72,6 @@ import { formatAuthors } from '../bibliography/utils/authors.js'
  *
  * @example
  * <AuthorList authors={[{ family: 'Smith', given: 'John', orcid: '0000-0001-2345-6789' }]} />
- *
- * @example
- * <AuthorList authors="Smith, John and Doe, Jane" style="mla" />
  */
 export function AuthorList({
   authors,
@@ -33,71 +81,48 @@ export function AuthorList({
   className,
   ...props
 }) {
-  // If authors is a string, just format it
+  // String authors — just display
   if (typeof authors === 'string') {
     return (
       <span className={className} {...props}>
-        {formatAuthors(authors, { style })}
+        {authors}
       </span>
     )
   }
 
-  // If no array or empty, return nothing
-  if (!authors?.length) {
-    return null
-  }
-
-  // Check if any author has ORCID
-  const hasOrcid = showOrcid && authors.some((a) => a.orcid)
+  if (!authors?.length) return null
 
   // If no ORCID to show, use simple formatted string
+  const hasOrcid = showOrcid && authors.some((a) => a.orcid)
+
   if (!hasOrcid) {
     return (
       <span className={className} {...props}>
-        {formatAuthors(authors, { style })}
+        {formatAuthorsText(authors, { style })}
       </span>
     )
   }
 
   // Render with ORCID links
+  const useAmpersand = style === 'apa'
+
   return (
     <span className={className} {...props}>
       {authors.map((author, index) => {
         const isLast = index === authors.length - 1
         const isSecondToLast = index === authors.length - 2
+        const isFirst = index === 0
+        const invertFirst = isFirst && (style === 'apa' || style === 'chicago' || style === 'mla')
 
-        // Format name based on style and position
-        let name
-        if (typeof author === 'string') {
-          name = author
-        } else {
-          const suffix = author.suffix ? `, ${author.suffix}` : ''
-          if (style === 'apa') {
-            // APA: Last, F.
-            const initials = author.given
-              ? author.given
-                  .split(/\s+/)
-                  .map((n) => `${n.charAt(0)}.`)
-                  .join(' ')
-              : ''
-            name = initials
-              ? `${author.family}${suffix}, ${initials}`
-              : author.family + suffix
-          } else {
-            // Default: First Last
-            name = author.given
-              ? `${author.given} ${author.family}${suffix}`
-              : author.family + suffix
-          }
-        }
+        const name = formatName(author, invertFirst)
 
         // Determine separator
         let sep = ''
         if (!isLast) {
           if (authors.length === 2) {
-            sep = style === 'apa' ? ' & ' : ' and '
+            sep = useAmpersand ? ' & ' : ' and '
           } else if (isSecondToLast) {
-            sep = style === 'apa' ? ', & ' : ', and '
+            sep = useAmpersand ? ', & ' : ', and '
           } else {
             sep = separator
           }

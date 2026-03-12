@@ -1,21 +1,22 @@
 /**
  * CiteButton Component
  *
- * A dropdown button that lets users copy citations in various formats.
+ * A dropdown button that lets users copy citations in various formats,
+ * including rich text (HTML with formatting preserved for paste into Word/Docs).
  *
  * @module @uniweb/scholar/components/CiteButton
  */
 
 import React, { useState, useRef, useEffect } from 'react'
-import { formatReference } from '../bibliography/formatters/index.js'
-import { exportBibtex } from '../bibliography/parsers/bibtex.js'
+import { formatReference, getAvailableStyles } from '../bibliography/formatters/index.js'
+import { exportBibtex } from '../bibliography/parsers/index.js'
 
 /**
  * CiteButton - Copy citation dropdown
  *
  * @param {Object} props
- * @param {Object} props.publication - Publication data
- * @param {Array<string>} [props.styles=['apa', 'mla', 'chicago', 'ieee', 'bibtex']] - Available citation styles
+ * @param {Object} props.publication - Publication data (Scholar or CSL-JSON)
+ * @param {Array<string>} [props.styles] - Style names to show (defaults to all + bibtex)
  * @param {string} [props.label='Cite'] - Button label
  * @param {string} [props.className] - Additional CSS classes
  *
@@ -24,7 +25,7 @@ import { exportBibtex } from '../bibliography/parsers/bibtex.js'
  */
 export function CiteButton({
   publication,
-  styles = ['apa', 'mla', 'chicago', 'ieee', 'bibtex'],
+  styles,
   label = 'Cite',
   className,
   ...props
@@ -32,6 +33,16 @@ export function CiteButton({
   const [isOpen, setIsOpen] = useState(false)
   const [copied, setCopied] = useState(null)
   const dropdownRef = useRef(null)
+
+  // Default: all available citation styles + bibtex
+  const availableStyles = getAvailableStyles()
+  const styleIds = styles || [...availableStyles.map((s) => s.id), 'bibtex']
+
+  // Build label map from available styles
+  const styleLabels = Object.fromEntries(
+    availableStyles.map((s) => [s.id, s.label])
+  )
+  styleLabels.bibtex = 'BibTeX'
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -47,30 +58,40 @@ export function CiteButton({
     }
   }, [isOpen])
 
-  // Copy citation to clipboard
+  /**
+   * Copy citation to clipboard.
+   * For citation styles, copies both plain text and rich HTML.
+   */
   async function copyToClipboard(style) {
     try {
-      let text
       if (style === 'bibtex') {
-        text = exportBibtex(publication)
+        const text = exportBibtex(publication)
+        await navigator.clipboard.writeText(text)
       } else {
-        text = formatReference(publication, { style })
+        const entry = formatReference(publication, { style })
+
+        // Try rich-text copy (HTML + plain text) for formatting in Word/Docs
+        if (typeof ClipboardItem !== 'undefined') {
+          try {
+            const item = new ClipboardItem({
+              'text/html': new Blob([entry.html], { type: 'text/html' }),
+              'text/plain': new Blob([entry.text], { type: 'text/plain' }),
+            })
+            await navigator.clipboard.write([item])
+          } catch {
+            // Fallback to plain text if rich copy fails
+            await navigator.clipboard.writeText(entry.text)
+          }
+        } else {
+          await navigator.clipboard.writeText(entry.text)
+        }
       }
 
-      await navigator.clipboard.writeText(text)
       setCopied(style)
       setTimeout(() => setCopied(null), 2000)
     } catch (err) {
       console.error('Failed to copy:', err)
     }
-  }
-
-  const styleLabels = {
-    apa: 'APA',
-    mla: 'MLA',
-    chicago: 'Chicago',
-    ieee: 'IEEE',
-    bibtex: 'BibTeX',
   }
 
   return (
@@ -127,7 +148,7 @@ export function CiteButton({
             top: '100%',
             left: 0,
             marginTop: '0.25rem',
-            minWidth: '8rem',
+            minWidth: '10rem',
             backgroundColor: '#ffffff',
             border: '1px solid #e5e7eb',
             borderRadius: '0.375rem',
@@ -136,7 +157,7 @@ export function CiteButton({
             overflow: 'hidden',
           }}
         >
-          {styles.map((style) => (
+          {styleIds.map((style) => (
             <button
               key={style}
               type="button"
@@ -163,7 +184,9 @@ export function CiteButton({
                 }
               }}
             >
-              {copied === style ? '✓ Copied!' : styleLabels[style] || style.toUpperCase()}
+              {copied === style
+                ? '✓ Copied!'
+                : styleLabels[style] || style.toUpperCase()}
             </button>
           ))}
         </div>

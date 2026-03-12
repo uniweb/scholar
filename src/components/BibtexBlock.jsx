@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from 'react'
-import { exportBibtex } from '../bibliography/parsers/bibtex.js'
+import { exportBibtex } from '../bibliography/parsers/index.js'
 
 /**
  * BibtexBlock - Display copyable BibTeX entry

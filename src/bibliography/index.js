@@ -1,42 +1,21 @@
 /**
  * Bibliography Module
  *
- * Utilities for formatting bibliographic references in various citation styles.
+ * Reference formatting powered by @citestyle/* compiled styles,
+ * BibTeX parsing and export, and data normalization utilities.
  *
  * @module @uniweb/scholar/bibliography
  */
 
-// Formatters
+// Formatters — citestyle-powered
 export {
   formatReference,
-  formatApa,
-  formatMla,
-  formatChicago,
-  formatIeee,
-  formatters,
+  getAvailableStyles,
+  compiledStyles,
 } from './formatters/index.js'
 
-// Parsers
+// Parsers — delegated to @citestyle/bibtex
 export { parseBibtex, exportBibtex } from './parsers/index.js'
 
-// Utilities
-export {
-  formatAuthors,
-  parseAuthorName,
-  parseAuthorString,
-  getInitials,
-  formatApaAuthors,
-  formatMlaAuthors,
-  formatChicagoAuthors,
-  formatIeeeAuthors,
-} from './utils/authors.js'
-
-export {
-  formatDate,
-  parseDate,
-  getYear,
-  formatApaDate,
-  formatMlaDate,
-  formatChicagoDate,
-  formatIeeeDate,
-} from './utils/dates.js'
+// Normalization — Scholar ↔ CSL-JSON bridge
+export { toCslJson, fromCslJson, mapType, unmapType } from './normalize.js'

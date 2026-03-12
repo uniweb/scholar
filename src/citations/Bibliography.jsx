@@ -1,69 +1,49 @@
 /**
  * Bibliography Component
  *
- * Renders a formatted list of references that have been cited in the document.
+ * Renders a formatted list of references using @citestyle/registry.
+ * The registry handles sorting, year-suffix disambiguation, and
+ * subsequent-author-substitute (em-dash for repeated authors).
  *
  * @module @uniweb/scholar/citations/Bibliography
  */
 
 import React, { useMemo } from 'react'
 import { useCitation } from './CitationProvider.jsx'
-import { formatReference } from '../bibliography/formatters/index.js'
 
 /**
- * Bibliography - Renders the list of cited references
+ * Bibliography - Renders the list of references
  *
  * @param {Object} props
  * @param {string} [props.title='References'] - Section title
  * @param {boolean} [props.showTitle=true] - Whether to show the title
- * @param {boolean} [props.showAll=false] - Show all references, not just cited ones
  * @param {string} [props.className] - Additional CSS classes
  * @param {string} [props.itemClassName] - CSS classes for each item
  *
  * @example
  * <Bibliography title="Works Cited" />
- *
- * @example
- * // Show all references including uncited ones
- * <Bibliography showAll />
  */
 export function Bibliography({
   title = 'References',
   showTitle = true,
-  showAll = false,
   className,
   itemClassName,
   ...props
 }) {
-  const { getCitedReferences, references, style, cited } = useCitation()
+  const { getBibliography, styleMeta } = useCitation()
 
-  // Get references to display
-  const refsToShow = useMemo(() => {
-    if (showAll) {
-      return references
-    }
-    return getCitedReferences()
-  }, [showAll, references, getCitedReferences])
+  // Get the fully formatted bibliography from the registry.
+  // The registry applies: sorting, subsequent-author-substitute,
+  // year-suffix disambiguation, and citation numbering.
+  const entries = useMemo(() => getBibliography(), [getBibliography])
 
-  // Format references
-  const formattedRefs = useMemo(() => {
-    return refsToShow.map((ref) => {
-      const number = cited.get(ref.id) || cited.get(ref.citationKey)
-      return {
-        id: ref.id || ref.citationKey,
-        number,
-        formatted: formatReference(ref, { style }),
-        reference: ref,
-      }
-    })
-  }, [refsToShow, style, cited])
-
-  if (!formattedRefs.length) {
+  if (!entries.length) {
     return null
   }
 
-  // Use numbered list for IEEE style
-  const isNumeric = style === 'ieee'
+  // Use numbered list for numeric styles (IEEE, Vancouver, etc.)
+  const isNumeric = styleMeta?.class === 'note' ||
+    styleMeta?.collapse === 'citation-number'
 
   return (
     <section className={className} {...props}>
@@ -87,38 +67,30 @@ export function Bibliography({
             lineHeight: '1.8',
           }}
         >
-          {formattedRefs.map((ref) => (
+          {entries.map((entry, i) => (
             <li
-              key={ref.id}
-              id={`ref-${ref.id}`}
+              key={entry.parts?.id || i}
+              id={`ref-${entry.parts?.id || i}`}
               className={itemClassName}
-              style={{
-                marginBottom: '0.75rem',
-              }}
-            >
-              {ref.formatted}
-            </li>
+              style={{ marginBottom: '0.75rem' }}
+              dangerouslySetInnerHTML={{ __html: entry.html }}
+            />
           ))}
         </ol>
       ) : (
-        <div
-          style={{
-            lineHeight: '1.8',
-          }}
-        >
-          {formattedRefs.map((ref) => (
-            <p
-              key={ref.id}
-              id={`ref-${ref.id}`}
+        <div style={{ lineHeight: '1.8' }}>
+          {entries.map((entry, i) => (
+            <div
+              key={entry.parts?.id || i}
+              id={`ref-${entry.parts?.id || i}`}
               className={itemClassName}
               style={{
                 marginBottom: '0.75rem',
                 paddingLeft: '2rem',
                 textIndent: '-2rem',
               }}
-            >
-              {ref.formatted}
-            </p>
+              dangerouslySetInnerHTML={{ __html: entry.html }}
+            />
           ))}
         </div>
       )}

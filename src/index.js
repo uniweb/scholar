@@ -4,21 +4,27 @@
  * Provides math rendering, bibliographic references, and inline citations
  * for academic and scientific content.
  *
+ * Bibliography formatting is powered by @citestyle/* compiled styles,
+ * giving access to 6 citation styles with structured HTML output,
+ * year-suffix disambiguation, and cite collapsing.
+ *
  * @module @uniweb/scholar
  */
 
 // Math components
 export { Math, Equation, EquationRef, loadKatex } from './math/index.js'
 
-// Bibliography utilities
+// Bibliography — formatting, parsing, normalization
 export {
   formatReference,
-  formatAuthors,
+  getAvailableStyles,
   parseBibtex,
   exportBibtex,
+  toCslJson,
+  fromCslJson,
 } from './bibliography/index.js'
 
-// Citation system
+// Citation system — registry-powered
 export {
   CitationProvider,
   Citation,
