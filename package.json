@@ -44,7 +44,7 @@
     "@citestyle/bibtex": "^0.0.2",
     "@citestyle/core": "^0.0.2",
     "@citestyle/registry": "^0.0.2",
-    "@citestyle/styles": "^0.0.2",
+    "@citestyle/styles": "^0.1.0",
     "katex": "^0.16.0"
   },
   "peerDependencies": {
