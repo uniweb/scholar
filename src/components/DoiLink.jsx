@@ -50,6 +50,12 @@ export function DoiLink({
     case 'link':
       displayText = doiUrl
       break
+    case 'label':
+      displayText = 'DOI'
+      break
+    case 'icon':
+      displayText = null
+      break
     case 'full':
     default:
       displayText = `DOI: ${normalizedDoi}`
@@ -61,35 +67,35 @@ export function DoiLink({
       target="_blank"
       rel="noopener noreferrer"
       className={className}
+      title={`DOI: ${normalizedDoi}`}
       style={{
-        color: '#2563eb',
+        color: 'var(--subtle, #6b7280)',
         textDecoration: 'none',
         display: 'inline-flex',
         alignItems: 'center',
         gap: '0.25rem',
+        fontSize: '0.8125rem',
+        transition: 'color 0.15s',
       }}
+      onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--primary, #2563eb)' }}
+      onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--subtle, #6b7280)' }}
       {...props}
     >
-      {displayText}
-      {showIcon && (
-        <svg
-          style={{
-            width: '0.875rem',
-            height: '0.875rem',
-            opacity: 0.7,
-          }}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-          />
-        </svg>
-      )}
+      {/* DOI icon — external link */}
+      <svg
+        style={{ width: '0.875rem', height: '0.875rem', flexShrink: 0 }}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={1.5}
+          d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+        />
+      </svg>
+      {displayText && <span>{displayText}</span>}
     </a>
   )
 }
