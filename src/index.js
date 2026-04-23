@@ -11,8 +11,10 @@
  * @module @uniweb/scholar
  */
 
-// Math components
-export { Math, Equation, EquationRef, loadKatex } from './math/index.js'
+// Math components — the former <Math> (KaTeX) was removed; plain LaTeX
+// in markdown ($x$ / $$x$$ / ```math) is compiled to MathML by the
+// content pipeline and rendered natively by the browser.
+export { Equation, EquationRef, loadKatex } from './math/index.js'
 
 // Bibliography — formatting, parsing, normalization
 export {

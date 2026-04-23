@@ -12,28 +12,21 @@ pnpm add @uniweb/scholar
 
 ## Features
 
-- **Math Rendering** - LaTeX equations with KaTeX (lazy-loaded)
+- **Numbered Equations** - Cross-referenceable display equations
 - **Bibliography** - Format references in APA, MLA, Chicago, and IEEE styles
 - **Citations** - Track inline citations with automatic bibliography generation
 - **BibTeX** - Parse and export BibTeX format
 - **UI Components** - Ready-to-use citation buttons, author lists, and DOI links
 
+> **Plain LaTeX math** (inline `$x$`, display `$$x$$`, fenced ```` ```math ````) is handled by Uniweb's content pipeline — the markdown parser compiles LaTeX to MathML Core at build time and the browser renders it natively. No runtime math library needed; no `<Math>` component required.
+
 ## Quick Start
 
-### Math Equations
+### Numbered Equations
 
 ```jsx
-import { Math, Equation, EquationRef, EquationProvider } from '@uniweb/scholar/math'
+import { Equation, EquationRef, EquationProvider } from '@uniweb/scholar/math'
 
-// Inline math
-<p>The equation <Math>E = mc^2</Math> shows mass-energy equivalence.</p>
-
-// Display (block) math
-<Math display>
-  \int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}
-</Math>
-
-// Numbered equations with cross-references
 <EquationProvider>
   <Equation id="einstein">E = mc^2</Equation>
   <p>As shown in <EquationRef id="einstein" />, energy equals mass times the speed of light squared.</p>
