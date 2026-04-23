@@ -1,31 +1,49 @@
 /**
  * Equation Component
  *
- * Renders a numbered equation with an optional label for cross-referencing.
- * Equations are numbered sequentially within a CitationProvider context.
+ * Renders a numbered display equation from pre-compiled MathML.
+ *
+ * The MathML is produced by Uniweb's content pipeline at build time
+ * (see @uniweb/content-reader/math). This component does no math
+ * rendering of its own — it wraps the MathML string with numbering and
+ * cross-reference machinery, which means it is fully SSR-safe and adds
+ * zero runtime math library cost to sites.
+ *
+ * Authors write labeled display equations in markdown:
+ *
+ *   ```math:einstein
+ *   E = mc^2
+ *   ```
+ *
+ * A foundation's section component then iterates `content.math` and
+ * renders each labeled entry through <Equation>:
+ *
+ *   <EquationProvider>
+ *     {content.math.map(m => (
+ *       <Equation key={m.id} id={m.id} mathml={m.mathml} />
+ *     ))}
+ *   </EquationProvider>
  *
  * @module @uniweb/scholar/math/Equation
  */
 
-import React, { useEffect, useState, useContext, useId } from 'react'
-import { loadKatex } from './katex-loader.js'
+import React, { useContext, useEffect, useId } from 'react'
 
 /**
- * Context for tracking equation numbers
- * Exported for use by EquationRef
+ * Context for tracking equation numbers. Exported for use by EquationRef.
  */
 export const EquationContext = React.createContext(null)
 
 /**
- * Provider for equation numbering
- * Wrap your content with this to enable automatic equation numbering.
+ * Provider for equation numbering. Wrap section content with this to
+ * enable automatic sequential numbering across all <Equation> instances.
  *
  * @param {Object} props
  * @param {React.ReactNode} props.children
  * @param {number} [props.startNumber=1] - Starting equation number
  */
 export function EquationProvider({ children, startNumber = 1 }) {
-  const [equations, setEquations] = useState(new Map())
+  const [equations, setEquations] = React.useState(new Map())
   const counterRef = React.useRef(startNumber)
 
   const register = React.useCallback((id) => {
@@ -39,7 +57,7 @@ export function EquationProvider({ children, startNumber = 1 }) {
 
   const getNumber = React.useCallback(
     (id) => equations.get(id),
-    [equations]
+    [equations],
   )
 
   return (
@@ -50,77 +68,35 @@ export function EquationProvider({ children, startNumber = 1 }) {
 }
 
 /**
- * Hook to access equation context
+ * Hook for foundation code that needs direct access to the numbering
+ * context (e.g., to render a list of all equations on a page).
  */
 export function useEquations() {
   return useContext(EquationContext)
 }
 
 /**
- * Equation - Numbered display equation with optional label
+ * Equation — numbered display equation rendered from pre-compiled MathML.
  *
  * @param {Object} props
- * @param {string} props.children - LaTeX expression
- * @param {string} [props.id] - Unique identifier for cross-referencing
- * @param {string} [props.label] - Custom label (defaults to equation number)
- * @param {string} [props.className] - Additional CSS classes
- *
- * @example
- * <EquationProvider>
- *   <Equation id="einstein">E = mc^2</Equation>
- *   <p>As shown in <EquationRef id="einstein" />, energy equals...</p>
- * </EquationProvider>
+ * @param {string} [props.id] - Identifier for cross-referencing. If omitted,
+ *   a stable React id is generated but will not be discoverable by <EquationRef>.
+ * @param {string} props.mathml - Pre-compiled MathML HTML string from the
+ *   content pipeline (e.g., `content.math[i].mathml`).
+ * @param {string} [props.label] - Override the auto-number with a custom label.
+ * @param {string} [props.className] - Additional CSS classes on the wrapper.
  */
-export function Equation({ children, id, label, className, ...props }) {
-  const [html, setHtml] = useState(null)
+export function Equation({ id, mathml, label, className, ...props }) {
+  const ctx = useContext(EquationContext)
   const generatedId = useId()
   const equationId = id || generatedId
-  const ctx = useContext(EquationContext)
 
-  // Extract LaTeX string from children
-  const latex = typeof children === 'string' ? children.trim() : ''
-
-  // Register equation for numbering
   useEffect(() => {
-    if (ctx) {
-      ctx.register(equationId)
-    }
+    if (ctx) ctx.register(equationId)
   }, [ctx, equationId])
 
-  // Get equation number
   const number = ctx?.getNumber(equationId)
-
-  // Render LaTeX
-  useEffect(() => {
-    if (!latex) return
-
-    let cancelled = false
-
-    async function render() {
-      const katex = await loadKatex()
-      if (cancelled || !katex) return
-
-      try {
-        const rendered = katex.renderToString(latex, {
-          displayMode: true,
-          throwOnError: false,
-        })
-        if (!cancelled) {
-          setHtml(rendered)
-        }
-      } catch (e) {
-        console.warn('[Equation] Render error:', e.message)
-      }
-    }
-
-    render()
-
-    return () => {
-      cancelled = true
-    }
-  }, [latex])
-
-  const displayLabel = label || (number ? `(${number})` : '')
+  const displayLabel = label !== undefined ? label : number ? `(${number})` : ''
 
   return (
     <div
@@ -135,16 +111,10 @@ export function Equation({ children, id, label, className, ...props }) {
       }}
       {...props}
     >
-      {/* Equation content */}
-      <div style={{ flex: 1, textAlign: 'center' }}>
-        {html ? (
-          <span dangerouslySetInnerHTML={{ __html: html }} />
-        ) : (
-          <code>{latex}</code>
-        )}
-      </div>
-
-      {/* Equation number */}
+      <div
+        style={{ flex: 1, textAlign: 'center' }}
+        dangerouslySetInnerHTML={{ __html: mathml || '' }}
+      />
       {displayLabel && (
         <span
           style={{

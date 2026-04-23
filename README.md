@@ -90,29 +90,49 @@ const bibtex = `
 
 ### Math Module
 
-#### `<Math>`
+Scholar does not ship a math renderer. Plain LaTeX in markdown is compiled to MathML by Uniweb's content pipeline and rendered natively by the browser — see the framework docs for the `$x$`, `$$x$$`, and ```math fence syntax.
 
-Renders inline or display LaTeX math.
+`<Equation>` and `<EquationRef>` cover the distinct feature of **numbered cross-referenceable equations**. They consume pre-compiled MathML from `content.math` and are fully SSR-safe.
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `children` | `string` | - | LaTeX expression |
-| `display` | `boolean` | `false` | Display mode (block) vs inline |
-| `className` | `string` | - | CSS classes |
+Label an equation in markdown with a `:<id>` suffix on the fence:
+
+````markdown
+```math:einstein
+E = mc^2
+```
+````
+
+Then in a foundation's section component:
+
+```jsx
+import { Equation, EquationProvider, EquationRef } from '@uniweb/scholar/math'
+
+function MyBlock({ content }) {
+  return (
+    <EquationProvider>
+      {content.math?.filter(m => m.id).map(m => (
+        <Equation key={m.id} id={m.id} mathml={m.mathml} />
+      ))}
+      <p>As shown in <EquationRef id="einstein" />, energy equals mc².</p>
+    </EquationProvider>
+  )
+}
+```
 
 #### `<Equation>`
 
-Renders a numbered equation with optional label.
+Numbered display equation rendered from pre-compiled MathML.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `children` | `string` | - | LaTeX expression |
-| `id` | `string` | auto | Unique ID for cross-referencing |
-| `label` | `string` | - | Custom label (defaults to number) |
+| `id` | `string` | auto | Identifier for cross-referencing |
+| `mathml` | `string` | - | Pre-compiled MathML from `content.math[i].mathml` |
+| `label` | `string` | - | Override the auto-number with a custom label |
+| `className` | `string` | - | CSS classes on the wrapper |
 
 #### `<EquationRef>`
 
-Creates a reference link to a numbered equation.
+Link to a numbered equation within the same `<EquationProvider>`.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
@@ -121,7 +141,7 @@ Creates a reference link to a numbered equation.
 
 #### `<EquationProvider>`
 
-Context provider for equation numbering. Wrap content containing equations.
+Context provider for equation numbering. Wrap content containing equations and their references.
 
 ### Citations Module
 
@@ -273,17 +293,14 @@ import { DoiLink } from '@uniweb/scholar/components'
 
 ## Bundle Size
 
-The package uses lazy loading to minimize initial bundle size:
+Scholar ships no math renderer — MathML is pre-compiled upstream and rendered natively by the browser. Approximate subpath sizes:
 
 | Module | Size |
 |--------|------|
 | bibliography (formatters, parsers) | ~15KB |
-| math (without KaTeX) | ~5KB |
-| KaTeX (lazy-loaded on first use) | ~90KB |
-| citations | ~10KB |
-| components | ~8KB |
-
-KaTeX CSS is automatically injected when math rendering is first used.
+| math (numbered equations, refs)    | ~5KB  |
+| citations                          | ~10KB |
+| components                         | ~8KB  |
 
 ## License
 
