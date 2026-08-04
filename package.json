@@ -1,6 +1,6 @@
 {
   "name": "@uniweb/scholar",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Academic content utilities for Uniweb - numbered equations with cross-references, bibliographic references, and inline citations",
   "type": "module",
   "exports": {
