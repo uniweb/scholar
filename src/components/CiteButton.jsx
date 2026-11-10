@@ -18,6 +18,8 @@ import { exportBibtex } from '../bibliography/parsers/index.js'
  * @param {Object} props.publication - Publication data (Scholar or CSL-JSON)
  * @param {Array<string>} [props.styles] - Style names to show (defaults to all + bibtex)
  * @param {string} [props.label='Cite'] - Button label
+ * @param {string} [props.copiedLabel] - What a style's entry says once its citation is copied.
+ *   Without one it says ✓ and the style's name, so the button brings no words of its own there.
  * @param {string} [props.className] - Additional CSS classes
  *
  * @example
@@ -27,6 +29,7 @@ export function CiteButton({
   publication,
   styles,
   label = 'Cite',
+  copiedLabel,
   className,
   ...props
 }) {
@@ -177,8 +180,8 @@ export function CiteButton({
                 padding: '0.375rem 0.625rem',
                 fontSize: '0.8125rem',
                 textAlign: 'left',
-                color: copied === style ? '#059669' : 'var(--body, #374151)',
-                backgroundColor: copied === style ? '#ecfdf5' : 'transparent',
+                color: copied === style ? 'var(--success, #059669)' : 'var(--body, #374151)',
+                backgroundColor: copied === style ? 'var(--success-subtle, #ecfdf5)' : 'transparent',
                 border: 'none',
                 borderRadius: '0.25rem',
                 cursor: 'pointer',
@@ -195,7 +198,7 @@ export function CiteButton({
               }}
             >
               {copied === style
-                ? '✓ Copied!'
+                ? copiedLabel || `✓ ${styleLabels[style] || style.toUpperCase()}`
                 : styleLabels[style] || style.toUpperCase()}
             </button>
           ))}

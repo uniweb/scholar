@@ -50,8 +50,8 @@ export function BibtexBlock({
       className={className}
       style={{
         position: 'relative',
-        backgroundColor: '#f8fafc',
-        border: '1px solid #e2e8f0',
+        backgroundColor: 'var(--card, #f8fafc)',
+        border: '1px solid var(--border, #e2e8f0)',
         borderRadius: '0.5rem',
         overflow: 'hidden',
       }}
@@ -64,15 +64,15 @@ export function BibtexBlock({
           justifyContent: 'space-between',
           alignItems: 'center',
           padding: '0.5rem 1rem',
-          backgroundColor: '#f1f5f9',
-          borderBottom: '1px solid #e2e8f0',
+          backgroundColor: 'var(--muted, #f1f5f9)',
+          borderBottom: '1px solid var(--border, #e2e8f0)',
         }}
       >
         <span
           style={{
             fontSize: '0.75rem',
             fontWeight: '600',
-            color: '#64748b',
+            color: 'var(--subtle, #64748b)',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
           }}
@@ -90,8 +90,8 @@ export function BibtexBlock({
               gap: '0.25rem',
               padding: '0.25rem 0.5rem',
               fontSize: '0.75rem',
-              color: copied ? '#059669' : '#64748b',
-              backgroundColor: copied ? '#ecfdf5' : 'transparent',
+              color: copied ? 'var(--success, #059669)' : 'var(--subtle, #64748b)',
+              backgroundColor: copied ? 'var(--success-subtle, #ecfdf5)' : 'transparent',
               border: 'none',
               borderRadius: '0.25rem',
               cursor: 'pointer',
@@ -145,7 +145,7 @@ export function BibtexBlock({
           lineHeight: '1.6',
           fontFamily:
             'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace',
-          color: '#334155',
+          color: 'var(--body, #334155)',
           overflowX: 'auto',
           whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
