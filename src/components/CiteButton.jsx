@@ -20,6 +20,9 @@ import { exportBibtex } from '../bibliography/parsers/index.js'
  * @param {string} [props.label='Cite'] - Button label
  * @param {string} [props.copiedLabel] - What a style's entry says once its citation is copied.
  *   Without one it says ✓ and the style's name, so the button brings no words of its own there.
+ * @param {Object<string, string>} [props.styleLabels] - What each style's entry is called, by
+ *   style id (`{ apa: 'APA', chicago: 'Chicago (auteur-date)' }`), so a site can name them in
+ *   its own language. A style it leaves out keeps scholar's name, such as "APA (7th ed.)".
  * @param {string} [props.className] - Additional CSS classes
  *
  * @example
@@ -30,6 +33,7 @@ export function CiteButton({
   styles,
   label = 'Cite',
   copiedLabel,
+  styleLabels: names,
   className,
   ...props
 }) {
@@ -41,11 +45,12 @@ export function CiteButton({
   const availableStyles = getAvailableStyles()
   const styleIds = styles || [...availableStyles.map((s) => s.id), 'bibtex']
 
-  // Build label map from available styles
-  const styleLabels = Object.fromEntries(
-    availableStyles.map((s) => [s.id, s.label])
-  )
-  styleLabels.bibtex = 'BibTeX'
+  // Each style's name: the caller's, else scholar's
+  const styleLabels = {
+    ...Object.fromEntries(availableStyles.map((s) => [s.id, s.label])),
+    bibtex: 'BibTeX',
+    ...names,
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -163,7 +168,8 @@ export function CiteButton({
             backgroundColor: 'var(--section, #ffffff)',
             border: '1px solid var(--border, #e5e7eb)',
             borderRadius: '0.5rem',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+            // Tinted with the theme's heading colour, so it follows the section's context
+            boxShadow: '0 4px 12px color-mix(in oklab, var(--heading, #111827) 8%, transparent)',
             zIndex: 50,
             overflow: 'hidden',
             padding: '0.25rem',

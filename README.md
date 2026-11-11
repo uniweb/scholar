@@ -223,6 +223,22 @@ import { CiteButton } from '@uniweb/scholar/components'
 />
 ```
 
+Its words are props, so a site in any language can give its own: `label` names the button
+(`Cite` when not given), `styleLabels` names the menu's entries by style id (scholar's names, such
+as `APA (7th ed.)`, for any it leaves out), and `copiedLabel` is what an entry says once its citation
+is copied (✓ and the entry's name when not given). Its colours are the theme's tokens, so it
+follows the section it sits in.
+
+```jsx
+<CiteButton
+  publication={pub}
+  styles={['apa', 'chicago', 'bibtex']}
+  label="Citer"
+  styleLabels={{ apa: 'APA (7e éd.)', chicago: 'Chicago (auteur-date)' }}
+  copiedLabel="Copié ✓"
+/>
+```
+
 #### `<BibtexBlock>`
 
 Display copyable BibTeX entry.
