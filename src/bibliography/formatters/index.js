@@ -49,6 +49,9 @@ const styleLabels = {
  * @param {Object} publication - Publication data (Scholar or CSL-JSON)
  * @param {Object} [options]
  * @param {string} [options.style='apa'] - Citation style name
+ * @param {Object} [options.locale] - A locale pack from `@citestyle/locales`, such as the default
+ *   export of `@citestyle/locales/fr-FR`: the style's terms, ordinals, dates and quotation marks
+ *   in that language. Without one, a style prints its own language's (English, for these).
  * @returns {{ html: string, text: string, parts: Object, links: Object }}
  *
  * @example
@@ -67,7 +70,7 @@ const styleLabels = {
  * entry.html  // "<span class=\"csl-entry\">Smith, J. (2024)..."
  */
 export function formatReference(publication, options = {}) {
-  const { style = 'apa' } = options
+  const { style = 'apa', locale } = options
 
   const compiled = compiledStyles[style.toLowerCase()]
   if (!compiled) {
@@ -77,7 +80,7 @@ export function formatReference(publication, options = {}) {
   }
 
   const item = toCslJson(publication)
-  return compiled.bibliography(item, {})
+  return compiled.bibliography(item, locale ? { locale } : {})
 }
 
 /**

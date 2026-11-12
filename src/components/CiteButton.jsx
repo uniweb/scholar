@@ -23,6 +23,8 @@ import { exportBibtex } from '../bibliography/parsers/index.js'
  * @param {Object<string, string>} [props.styleLabels] - What each style's entry is called, by
  *   style id (`{ apa: 'APA', chicago: 'Chicago (auteur-date)' }`), so a site can name them in
  *   its own language. A style it leaves out keeps scholar's name, such as "APA (7th ed.)".
+ * @param {Object} [props.locale] - A locale pack from `@citestyle/locales` for the citations it
+ *   copies, so they read in the page's language; see `formatReference`.
  * @param {string} [props.className] - Additional CSS classes
  *
  * @example
@@ -34,6 +36,7 @@ export function CiteButton({
   label = 'Cite',
   copiedLabel,
   styleLabels: names,
+  locale,
   className,
   ...props
 }) {
@@ -76,7 +79,7 @@ export function CiteButton({
         const text = exportBibtex(publication)
         await navigator.clipboard.writeText(text)
       } else {
-        const entry = formatReference(publication, { style })
+        const entry = formatReference(publication, { style, locale })
 
         // Try rich-text copy (HTML + plain text) for formatting in Word/Docs
         if (typeof ClipboardItem !== 'undefined') {

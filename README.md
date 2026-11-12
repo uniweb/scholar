@@ -197,6 +197,35 @@ const ref = formatReference({
 }, { style: 'apa' })
 ```
 
+A style prints words of its own: "and", "et al.", "vol.", "pp.", month names, quotation marks.
+They are English unless you pass a locale pack from
+[`@citestyle/locales`](https://www.npmjs.com/package/@citestyle/locales), one per CSL language:
+
+```js
+import fr from '@citestyle/locales/fr-FR'
+
+formatReference(pub, { style: 'mla', locale: fr })
+// … « Bridging Human Expertise and AI ». …, vol. 12, nᵒ 8, mars 2023, p. 78‑89.
+```
+
+A foundation carries every pack it imports, about 3–4 KB gzipped each, so import the languages
+its sites use (`npm install @citestyle/locales`) and pick one by the page's language. A language
+with no pack keeps the style's English words.
+
+```jsx
+import { useWebsite } from '@uniweb/kit'
+import fr from '@citestyle/locales/fr-FR'
+import de from '@citestyle/locales/de-DE'
+
+const PACKS = { fr, de }
+
+function Reference({ pub }) {
+  const { website } = useWebsite()
+  const locale = PACKS[website.getActiveLocale()?.split('-')[0]]
+  return <p>{formatReference(pub, { style: 'apa', locale }).text}</p>
+}
+```
+
 #### `parseBibtex(bibtex)` / `exportBibtex(publication)`
 
 Parse BibTeX to objects or export objects to BibTeX.
@@ -236,8 +265,12 @@ follows the section it sits in.
   label="Citer"
   styleLabels={{ apa: 'APA (7e éd.)', chicago: 'Chicago (auteur-date)' }}
   copiedLabel="Copié ✓"
+  locale={fr}
 />
 ```
+
+`locale` is a locale pack, as for `formatReference`, so the citations it copies read in the
+page's language too.
 
 #### `<BibtexBlock>`
 

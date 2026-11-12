@@ -40,15 +40,16 @@
     "node": ">=22.12"
   },
   "dependencies": {
-    "@citestyle/bibtex": "^1.0.0",
-    "@citestyle/core": "^1.0.0",
-    "@citestyle/registry": "^1.0.0",
-    "@citestyle/styles": "^1.0.0"
+    "@citestyle/bibtex": "^1.2.0",
+    "@citestyle/core": "^1.1.0",
+    "@citestyle/registry": "^1.2.0",
+    "@citestyle/styles": "^1.1.0"
   },
   "peerDependencies": {
     "react": "^19.0.0"
   },
   "devDependencies": {
+    "@citestyle/locales": "^1.1.0",
     "@testing-library/react": "^16.0.0",
     "jsdom": "^25.0.0",
     "react": "^19.0.0",
